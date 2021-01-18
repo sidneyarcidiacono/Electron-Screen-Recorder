@@ -1,14 +1,31 @@
-// Buttons
-const videoElement = document.querySelector('video')
-const startBtn = document.getElementById('startBtn')
-const stopBtn = document.getElementById('stopBtn')
-const videoSelectBtn = document.getElementById('videoSelectBtn')
-
 const { desktopCapturer, remote } = require('electron')
 const { Menu } = remote
 
 const { dialog } = remote
 const { writeFile } = require('fs')
+
+let mediaRecorder // MediaRecorder instance to capture footage
+const recordedChunks = []
+// Buttons
+const videoElement = document.querySelector('video')
+
+const startBtn = document.getElementById('startBtn')
+startBtn.onclick = e => {
+  mediaRecorder.start()
+  startBtn.classList.add('is-danger')
+  startBtn.innerText = 'Recording'
+}
+
+const stopBtn = document.getElementById('stopBtn')
+stopBtn.onclick = e => {
+  mediaRecorder.stop()
+  startBtn.classList.remove('is-danger')
+  startBtn.innerText = 'Start'
+}
+
+const videoSelectBtn = document.getElementById('videoSelectBtn')
+videoSelectBtn.onclick = getVideoSource
+
 
 // Get the available video sources
 async function getVideoSource () {
@@ -28,8 +45,6 @@ async function getVideoSource () {
   videoOptionsMenu.popup()
 }
 
-let mediaRecorder // MediaRecorder instance to capture footage
-const recordedChunks = []
 
 async function selectSource (source) {
   videoSelectBtn.innerText = source.name
@@ -78,7 +93,7 @@ async function handleStop(e) {
   })
 
   console.log(filePath)
+  writeFile(filePath, buffer, () => {
+    console.log('Video saved successfully.')
+  })
 }
-
-
-videoSelectBtn.onclick = getVideoSource
